@@ -19,7 +19,6 @@ public class SoldierControl{
 	public static void obey() throws Exception{
 		if (rc.isActive()) {
 			int to = rc.readBroadcast(band*100);
-			System.out.println(to);
 			MapLocation dest = Util.decodeLocation(to);
 			Direction dir = rc.getLocation().directionTo(dest);
 			if (rc.canMove(dir)) {
@@ -33,6 +32,9 @@ public class SoldierControl{
 		}
 	}
 	public static void attemptAttack() throws Exception{
-		
+		Robot enemies[] = rc.senseNearbyGameObjects(Robot.class, 50, rc.getTeam().opponent());
+		if (enemies.length > 0 && rc.isActive()){
+			rc.attackSquare(rc.senseLocationOf(enemies[0]));
+		}
 	}
 }
