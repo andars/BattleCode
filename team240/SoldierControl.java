@@ -5,15 +5,20 @@ import battlecode.common.*;
 public class SoldierControl{
 	static RobotController rc;
 	static int band;
+	static int attempts[] = {0, 1, -1, 2, -2, 3, -3};
 	static Direction dirs[] = Direction.values();
 	public static void run(RobotController rci) throws Exception{
 		rc = rci;
 		band = 1;
 		//basicMove();
 		while(true){
-			obey();
-			attemptAttack();
-			rc.yield();
+			try{
+				attemptAttack();
+				obey();
+				rc.yield();
+			} catch (Exception e){
+				e.printStackTrace();
+			}
 		}	
 	}
 	public static void obey() throws Exception{
@@ -21,8 +26,12 @@ public class SoldierControl{
 			int to = rc.readBroadcast(band*100);
 			MapLocation dest = Util.decodeLocation(to);
 			Direction dir = rc.getLocation().directionTo(dest);
-			if (rc.canMove(dir)) {
-				rc.move(dir);
+			int dirnum = dir.ordinal();
+			//moving somewhere is better than nowhere
+			for (int i = 0; i<attempts.length; i++){
+				if (rc.isActive() && rc.canMove(dirs[(dirnum+attempts[i]+8)%8])) {
+					rc.move(dirs[(dirnum+attempts[i]+8)%8]);
+				}
 			}
 		}
 	}
@@ -32,9 +41,14 @@ public class SoldierControl{
 		}
 	}
 	public static void attemptAttack() throws Exception{
-		Robot enemies[] = rc.senseNearbyGameObjects(Robot.class, 50, rc.getTeam().opponent());
+		Robot enemies[] = rc.senseNearbyGameObjects(Robot.class, 35, rc.getTeam().opponent());
+		MapLocation loc = null;
 		if (enemies.length > 0 && rc.isActive()){
-			rc.attackSquare(rc.senseLocationOf(enemies[0]));
+			 loc = rc.senseLocationOf(enemies[0]);
+			if (rc.canAttackSquare(loc)) {
+				rc.attackSquare(rc.senseLocationOf(enemies[0]));
+			}
 		}
+		System.out.println(loc);
 	}
 }

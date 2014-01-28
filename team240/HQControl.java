@@ -13,7 +13,6 @@ public class HQControl{
 			if (Clock.getRoundNum()%10 == 0) {
 				pastrs = rc.sensePastrLocations(rc.getTeam().opponent());
 			}
-			System.out.println(Arrays.toString(pastrs));
 			command();
 			attemptSpawn();
 			rc.yield();
